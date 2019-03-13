@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+        <title>Docker tutorial</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.0/dist/katex.min.css" integrity="sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+        <link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <style>
+.task-list-item { list-style-type: none; } .task-list-item-checkbox { margin-left: -20px; vertical-align: middle; }
+</style>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        
+        <script src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+    </head>
+    <body>
+        <h1 id="docker-tutorial">Docker tutorial</h1>
+<h4 id="need-for-docker">Need for Docker</h4>
+<p>Pre-virtualization had a number of problems</p>
+<ul>
+<li>huge cost of VMs</li>
+<li>slow deployment, hard to manage</li>
+<li>VMWare and VirtualBox provided virtualization software which improved the process</li>
+<li>things improved when Azure, AWS started providing VMs for hire. They provided pay-as-you-go model. Also deployment was extremely fast.</li>
+</ul>
+<p>Virtualization changed the game as they allowed to almost eliminate the virtual OS.</p>
+<ul>
+<li>all containers run on the same linux kernel. However, isolation is provided at runtime.</li>
+<li>containers pack up only the needed parts of the OS. Thus they are faster to deploy, scale up</li>
+<li>containers are fully portable</li>
+</ul>
+<h2 id="docker-architecture">Docker architecture</h2>
+<p>There are 2 distinct parts</p>
+<ul>
+<li><code>docker client</code> - you interact with this layer, typically via CLI apps</li>
+<li><code>docker daemon</code> - the background process which powers the containers. We don't talk to this directly, but only via the <code>docker client</code>.</li>
+</ul>
+<p>Typically, the docker client and daemon run on the same machine, but it is possible from the client to connect to a remote daemon.</p>
+<h3 id="images-and-containers-registries-and-repositories">Images and Containers, Registries and Repositories</h3>
+<p><strong>Images</strong> are read-only templates composed by stacking up other images. They are hosted on docker registry.</p>
+<p><strong>Containers</strong> is an instance of an image.</p>
+<p><strong>Registry</strong> is where we store our images. You can host this yourself or use Docker's public registry called <code>DockerHub</code>. <strong>Repositories</strong> are repos within the registry where images of a particular type are stored.</p>
+<p><strong>Docker Hub</strong> - is a public registry. Official repos are encouraged to be used as they are vetted by Docker and ensure they get security updates frequently. Generally, user created repos have a prefixing <code>username/repo_name/image_name</code>. Usually, <code>tags</code> are used to specify docker versions.</p>
+<h2 id="docker-commands">Docker commands</h2>
+<ul>
+<li>list all images held locally - <code>docker images</code></li>
+<li>run an image - <code>docker run busybox:1.23 echo &quot;hello world&quot;</code> which is of syntax <code>docker run image &lt;command to run on image&gt; &lt;argument for command&gt;</code> On running this, Docker will try to find the image locally, if not found, will download from docker hub and run. Example output below:</li>
+</ul>
+<pre><code class="language-cmd"><div>open-geo [master] $ docker run busybox:latest <span class="hljs-built_in">echo</span> "hello atma"
+Unable to <span class="hljs-built_in">find</span> image 'busybox:latest' locally
+<span class="hljs-function">latest: <span class="hljs-title">Pulling</span> <span class="hljs-title">from</span> <span class="hljs-title">library</span>/<span class="hljs-title">busybox</span>
+697743189<span class="hljs-title">b6d</span>: <span class="hljs-title">Pull</span> <span class="hljs-title">complete</span> 
+<span class="hljs-title">Digest</span>: <span class="hljs-title">sha256</span>:061<span class="hljs-title">ca9704a714ee3e8b80523ec720c64f6209ad3f97c0ff7cb9ec7d19f15149f</span>
+<span class="hljs-title">Status</span>: <span class="hljs-title">Downloaded</span> <span class="hljs-title">newer</span> <span class="hljs-title">image</span> <span class="hljs-title">for</span> <span class="hljs-title">busybox:latest</span>
+<span class="hljs-title">hello</span> <span class="hljs-title">atma</span>
+<span class="hljs-title">open</span>-<span class="hljs-title">geo</span> [<span class="hljs-title">master</span>] $ 
+</span></div></code></pre>
+<ul>
+<li>if you run the same command agin, it will run faster as there is no downloading.</li>
+<li>you can do other things like look at the contents of the image by calling <code>docker run busybox:latest ls /</code></li>
+</ul>
+<h4 id="running-docker-in-interactive-mode">Running docker in interactive mode</h4>
+<ul>
+<li>run the image with <code>-i</code>, <code>-t</code> commands for interactive, TTY mode.</li>
+<li><code>docker run -i -t busybox:latest</code>. You can exit by typing <code>exit</code></li>
+</ul>
+<h4 id="running-in-foreground-vs-detached-modes">Running in foreground vs detached modes</h4>
+<p>The default mode is to run in foreground. Docker will start the process in container, attaches the console to this process' std output. You terminate the process and the connection together. When running, the terminal cannot be used for other things.</p>
+<p>Background / detached mode on the other hand can be stared with <code>-d</code> flag. The container is killed when the root process of container terminates. You can use the terminal to do other things while the container is running.</p>
+<ul>
+<li>You can list the running <strong>containers</strong> using <code>docker ps</code> command. Add the <code>-a</code> to list all containers that are stopped as well.</li>
+<li>By default, docker remembers both your containers and images. So you can rerun a docker container. If you do not want to retain a container, use <code>docker run --rm</code> option. The container is removed after it is run.</li>
+<li>to remove a container, run <code>docker rm &lt;name of container&gt;</code>.</li>
+<li>to run a container with a custom name, run <code>docker run --name &lt;custom_name&gt; &lt;commands&gt;</code>. Then you can verify this using <code>docker ps -a</code> command.</li>
+</ul>
+<h4 id="docker-inspect">Docker inspect</h4>
+<p>Use inspect to display low level information about a container or image.</p>
+<ul>
+<li>to get low level details, run <code>docker inspect &lt;container_id&gt;</code> or <code>docker inspect &lt;conatiner_name&gt;</code></li>
+</ul>
+
+    </body>
+    </html>
