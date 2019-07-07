@@ -165,3 +165,26 @@ admin@dd29aef6445a:~$
 To exit out of the container's bash, type `exit`. To stop the container running as daemon, type `docker stop <container_name>`.
 
 ## KVP lookup app using Flask
+
+## Linking containers using `redis`
+`redis` is a message broker, inmemory cache, db service that is containerized. We need a redis Python client.
+
+## Linking with Docker compose
+`docker-compose.yml` is a YAML file. Verison 3 is up to date. You start with a version number. Then specify the services that needs to be run. The `dockerapp` contains the main, user facing app, the `depends_on` contains all other microservices that need to be spun up and the order in which they need to be spun up.
+A sample looks like:
+
+```yaml
+verison: '3'
+services:
+  dockerapp:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+  redis:
+    image: redis:3.2.0
+```
+To build and run using docker compose, run `docker-compose up -d` from dir that contains the yaml file. Once done, you can run `docker ps` to see the containers created and being run.
+
+To rebuild a docker compose, you may have to force it if are changing just the python stack. To force rebuild use `docker-compose build`.
